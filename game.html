@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prakriti Sort Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#7a1f2b; --maroon-dk:#4e1018; --saffron:#e8772e; --marigold:#f4b223;
+    --turmeric:#f7d774; --peacock:#0f6e6e; --leaf:#4f7a2a; --ivory:#fdf6e9;
+    --sand:#f5e6c8; --ink:#2b1a12; --muted:#6b5546; --red:#b3362b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Poppins',sans-serif;background:var(--ivory);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;line-height:1.1}
+  .hi{font-family:'Tiro Devanagari Hindi',serif}
+  .toran{height:34px;flex-shrink:0;background:
+      radial-gradient(circle at 50% 0,var(--marigold) 9px,transparent 10px) 0 0/36px 34px repeat-x,
+      radial-gradient(circle at 50% 18px,var(--saffron) 7px,transparent 8px) 0 0/36px 34px repeat-x,
+      linear-gradient(var(--leaf),var(--leaf)) 0 0/100% 4px no-repeat}
+  header{background:var(--maroon-dk);color:var(--turmeric);border-bottom:3px solid var(--marigold)}
+  header .bar{max-width:900px;margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+  header a{color:var(--sand);font-size:.9rem;opacity:.85;text-decoration:none}
+  header a:hover{opacity:1}
+  header h1{font-size:1.5rem}
+
+  main{flex:1;max-width:900px;width:100%;margin:0 auto;padding:30px 16px 50px;text-align:center}
+  .screen{display:none}
+  .screen.active{display:block}
+
+  .intro h2{font-size:clamp(2.2rem,6vw,3.4rem);color:var(--maroon)}
+  .intro .hi{color:var(--saffron);font-size:1.2rem;margin:4px 0 18px}
+  .intro p{color:var(--muted);max-width:560px;margin:0 auto 12px}
+  .rules{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:24px 0 30px}
+  .rules div{background:#fff;border:1px solid rgba(122,31,43,.18);border-radius:14px;padding:14px 18px;font-size:.9rem;max-width:220px}
+  .btn{border:0;cursor:pointer;font:inherit;font-weight:600;padding:14px 34px;border-radius:40px;background:var(--marigold);color:var(--maroon-dk);box-shadow:0 8px 24px rgba(244,178,35,.35);transition:.2s}
+  .btn:hover{transform:translateY(-2px);background:var(--turmeric)}
+  .btn.alt{background:transparent;border:1.5px solid var(--maroon);color:var(--maroon);box-shadow:none}
+
+  .hud{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;font-weight:500}
+  .hud .pill{background:var(--sand);padding:6px 16px;border-radius:30px;font-size:.9rem}
+  .progress{height:8px;background:var(--sand);border-radius:4px;overflow:hidden;margin-bottom:26px}
+  .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--saffron),var(--marigold));transition:width .4s}
+
+  .item{width:min(280px,80vw);margin:0 auto 26px;background:#fff;border-radius:22px;padding:30px 20px;border:2px solid var(--marigold);box-shadow:0 14px 34px rgba(122,31,43,.12);position:relative;cursor:grab;user-select:none;touch-action:none}
+  .item::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(232,119,46,.35);border-radius:16px;pointer-events:none}
+  .item .emo{font-size:4.2rem;line-height:1}
+  .item h3{font-size:1.7rem;color:var(--maroon);margin-top:10px}
+  .item .hi{color:var(--muted);font-size:1rem}
+  .item.pop{animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.7);opacity:0}}
+  .item.shake{animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+
+  .bins{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .bin{border:0;font:inherit;cursor:pointer;border-radius:20px;padding:22px 14px;color:#fff;transition:.2s;position:relative;overflow:hidden}
+  .bin::after{content:"";position:absolute;right:-30px;top:-30px;width:100px;height:100px;border-radius:50%;border:12px dotted rgba(255,255,255,.15)}
+  .bin.green{background:linear-gradient(135deg,var(--leaf),#78a33a)}
+  .bin.red{background:linear-gradient(135deg,var(--maroon),var(--red))}
+  .bin:hover,.bin.over{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 28px rgba(0,0,0,.18)}
+  .bin .ico{font-size:2.2rem}
+  .bin b{display:block;font-size:1.05rem;margin-top:4px}
+  .bin small{opacity:.85}
+
+  .feedback{min-height:70px;margin-top:22px;padding:14px 18px;border-radius:14px;font-size:.95rem;display:none}
+  .feedback.ok{display:block;background:#e7f1dc;color:#2f5214}
+  .feedback.no{display:block;background:#f8dcd8;color:#7a1f2b}
+
+  .result h2{font-size:clamp(2.4rem,7vw,3.6rem);color:var(--maroon)}
+  .score-ring{width:180px;height:180px;margin:24px auto;border-radius:50%;display:grid;place-items:center;background:var(--ivory);box-shadow:0 0 0 8px var(--marigold),0 0 0 16px var(--sand)}
+  .score-ring b{font-family:'Cormorant Garamond',serif;font-size:3.4rem;color:var(--maroon);line-height:1}
+  .score-ring small{color:var(--muted)}
+  .result p{color:var(--muted);max-width:520px;margin:0 auto 26px}
+  .result .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .review{margin:30px auto 0;max-width:560px;text-align:left}
+  .review div{padding:8px 12px;border-bottom:1px dashed rgba(122,31,43,.2);font-size:.9rem}
+
+  footer{background:var(--maroon-dk);color:rgba(253,246,233,.75);text-align:center;padding:16px;font-size:.85rem}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="toran"></div>
+<header>
+  <div class="bar">
+    <h1>🌿 Prakriti Sort</h1>
+    <a href="index.html">← Back to Home</a>
+  </div>
+</header>
+
+<main>
+  <!-- INTRO -->
+  <section class="screen intro active" id="intro">
+    <h2>Is it Biodegradable?</h2>
+    <div class="hi">क्या यह प्रकृति में घुल-मिल जाएगा?</div>
+    <p>Some materials return to nature as soil. Others stay in landfills for hundreds of years. Can you tell them apart?</p>
+    <div class="rules">
+      <div>👆 <b>Tap a bin</b> or <b>drag the card</b> into it</div>
+      <div>🌱 <b>Green bin</b> — Biodegradable</div>
+      <div>🚫 <b>Red bin</b> — Non-biodegradable</div>
+    </div>
+    <button class="btn" onclick="startGame()">Start Game ▶</button>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="play">
+    <div class="hud">
+      <span class="pill" id="qnum">1 / 12</span>
+      <span class="pill">⭐ <span id="score">0</span></span>
+      <span class="pill">🔥 <span id="streak">0</span></span>
+    </div>
+    <div class="progress"><i id="bar"></i></div>
+
+    <div class="item" id="item"></div>
+
+    <div class="bins">
+      <button class="bin green" data-bio="true"><div class="ico">🌱</div><b>Biodegradable</b><small class="hi">जैव-निम्नीकरणीय</small></button>
+      <button class="bin red" data-bio="false"><div class="ico">🚫</div><b>Non-biodegradable</b><small class="hi">अजैव-निम्नीकरणीय</small></button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen result" id="result">
+    <h2 id="title">Shabaash!</h2>
+    <div class="score-ring"><div><b id="final">0</b><br><small>out of <span id="total"></span></small></div></div>
+    <p id="msg"></p>
+    <div class="actions">
+      <button class="btn" onclick="startGame()">Play Again 🔁</button>
+      <a class="btn alt" href="index.html" style="text-decoration:none">Back to Home</a>
+    </div>
+    <div class="review" id="review"></div>
+  </section>
+</main>
+
+<footer>Upcycle Fashion Project · Govt. Sr. Sec. School, Fatehpur Chandila, Faridabad</footer>
+
+<script>
+  const ITEMS=[
+    {e:"🍃",n:"Neem Leaves",h:"नीम की पत्तियाँ",bio:true,f:"Neem leaves decompose in weeks — and we use them for our natural fabric finish!"},
+    {e:"👖",n:"Cotton Denim",h:"सूती डेनिम",bio:true,f:"100% cotton denim breaks down in a few months. Even better — upcycle it first!"},
+    {e:"🛍️",n:"Plastic Bag",h:"प्लास्टिक की थैली",bio:false,f:"A plastic bag can take 500+ years to break down. Carry a denim bag instead!"},
+    {e:"🍌",n:"Banana Peel",h:"केले का छिलका",bio:true,f:"Banana peels turn into compost in 2–5 weeks."},
+    {e:"🧴",n:"Plastic Bottle",h:"प्लास्टिक की बोतल",bio:false,f:"PET bottles take about 450 years to decompose."},
+    {e:"🧣",n:"Jute Bag",h:"जूट का थैला",bio:true,f:"Jute — the 'golden fibre' of Bengal — decomposes in 1–2 years."},
+    {e:"🥫",n:"Aluminium Can",h:"एल्युमिनियम का डिब्बा",bio:false,f:"Cans take 200+ years to degrade — but they are fully recyclable!"},
+    {e:"🍂",n:"Sal Leaf Plate",h:"पत्तल",bio:true,f:"Traditional pattal plates made of leaves return to soil in a few weeks."},
+    {e:"👕",n:"Polyester Shirt",h:"पॉलिएस्टर कमीज़",bio:false,f:"Polyester is plastic fibre — it can last 200 years and sheds microplastics."},
+    {e:"🏺",n:"Kulhad (Clay Cup)",h:"कुल्हड़",bio:true,f:"Kulhads are made of earth and go right back to the earth."},
+    {e:"🥤",n:"Thermocol Cup",h:"थर्मोकोल कप",bio:false,f:"Thermocol (styrofoam) may never fully biodegrade."},
+    {e:"📰",n:"Newspaper",h:"अख़बार",bio:true,f:"Paper decomposes in 2–6 weeks."},
+    {e:"🔋",n:"Battery",h:"बैटरी",bio:false,f:"Batteries leak toxic metals — always drop them at e-waste collection points."},
+    {e:"🥥",n:"Coconut Shell",h:"नारियल का खोल",bio:true,f:"Coconut coir and shells are natural and fully biodegradable."},
+    {e:"🧽",n:"Synthetic Sponge",h:"सिंथेटिक स्पंज",bio:false,f:"Synthetic sponges are plastic. Try a loofah (तोरई) — it's natural!"},
+    {e:"🌸",n:"Marigold Flowers",h:"गेंदे के फूल",bio:true,f:"Temple flowers can be composted or even turned into natural dyes."},
+    {e:"📦",n:"Cardboard Box",h:"गत्ते का डिब्बा",bio:true,f:"Cardboard breaks down in about 2 months — or reuse it as a pen box first!"},
+    {e:"🪵",n:"Wooden Spoon",h:"लकड़ी का चम्मच",bio:true,f:"Untreated wood returns to the soil — a great swap for plastic cutlery."},
+    {e:"🍶",n:"Glass Jar",h:"काँच का जार",bio:false,f:"Glass can last a million years in a landfill — but it can be reused and recycled forever!"},
+    {e:"🪢",n:"Nylon Rope",h:"नायलॉन की रस्सी",bio:false,f:"Nylon is a plastic fibre. Choose jute or coir rope instead."},
+    {e:"🥚",n:"Eggshells",h:"अंडे के छिलके",bio:true,f:"Eggshells add calcium to compost and break down naturally."},
+    {e:"💿",n:"Old CD",h:"पुरानी सीडी",bio:false,f:"CDs are polycarbonate plastic — they take over 1 million years to decompose."},
+  ];
+  const ROUNDS=12;
+  let deck=[],i=0,score=0,streak=0,locked=false,log=[];
+  const $=id=>document.getElementById(id);
+
+  function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id))}
+
+  function startGame(){
+    deck=[...ITEMS].sort(()=>Math.random()-.5).slice(0,ROUNDS);
+    i=0;score=0;streak=0;log=[];
+    show('play');render();
+  }
+
+  function render(){
+    const it=deck[i];
+    $('item').innerHTML=`<div class="emo">${it.e}</div><h3>${it.n}</h3><div class="hi">${it.h}</div>`;
+    $('item').className='item pop';
+    $('qnum').textContent=`${i+1} / ${ROUNDS}`;
+    $('score').textContent=score;$('streak').textContent=streak;
+    $('bar').style.width=(i/ROUNDS*100)+'%';
+    $('feedback').className='feedback';
+    locked=false;
+  }
+
+  function answer(bio){
+    if(locked)return; locked=true;
+    const it=deck[i], ok=bio===it.bio;
+    if(ok){score++;streak++}else{streak=0;$('item').className='item shake'}
+    log.push({it,ok});
+    $('score').textContent=score;$('streak').textContent=streak;
+    $('feedback').className='feedback '+(ok?'ok':'no');
+    $('feedback').innerHTML=(ok?'✅ <b>Sahi jawab!</b> ':'❌ <b>Oops!</b> It is '+(it.bio?'biodegradable':'non-biodegradable')+'. ')+it.f;
+    setTimeout(()=>{i++; i<ROUNDS?render():finish()},1900);
+  }
+
+  function finish(){
+    $('bar').style.width='100%';
+    $('final').textContent=score;$('total').textContent=ROUNDS;
+    const pct=score/ROUNDS;
+    $('title').textContent=pct===1?'Prakriti Rakshak! 🏆':pct>=.75?'Shabaash! 🌟':pct>=.5?'Achha Prayas! 👍':'Keep Learning! 🌱';
+    $('msg').textContent=pct>=.75
+      ?'You really know your materials! Choose natural fibres like cotton, jute and neem-finished denim to keep our planet clean.'
+      :'Every expert was once a beginner. Remember: if it comes from nature, it usually goes back to nature.';
+    $('review').innerHTML=log.map(({it,ok})=>`<div>${ok?'✅':'❌'} ${it.e} <b>${it.n}</b> — ${it.bio?'🌱 Biodegradable':'🚫 Non-biodegradable'}</div>`).join('');
+    show('result');
+  }
+
+  // tap bins
+  document.querySelectorAll('.bin').forEach(b=>b.addEventListener('click',()=>answer(b.dataset.bio==='true')));
+
+  // drag the card onto a bin (mouse + touch)
+  const card=$('item');let sx,sy,drag=false;
+  card.addEventListener('pointerdown',e=>{if(locked)return;drag=true;sx=e.clientX;sy=e.clientY;card.setPointerCapture(e.pointerId);card.style.transition='none'});
+  card.addEventListener('pointermove',e=>{
+    if(!drag)return;
+    card.style.transform=`translate(${e.clientX-sx}px,${e.clientY-sy}px) rotate(${(e.clientX-sx)/20}deg)`;
+    document.querySelectorAll('.bin').forEach(b=>b.classList.toggle('over',hit(b,e)));
+  });
+  card.addEventListener('pointerup',e=>{
+    if(!drag)return;drag=false;
+    card.style.transition='';card.style.transform='';
+    const b=[...document.querySelectorAll('.bin')].find(b=>hit(b,e));
+    document.querySelectorAll('.bin').forEach(b=>b.classList.remove('over'));
+    if(b)answer(b.dataset.bio==='true');
+  });
+  function hit(el,e){const r=el.getBoundingClientRect();return e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom}
+</script>
+</body>
+</html>
