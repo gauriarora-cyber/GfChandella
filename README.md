@@ -1,9 +1,9 @@
-# 🌿 Upcycle Fashion — Purana Denim, Naya Andaaz
+#  Upcycle Fashion — Purana Denim, Naya Andaaz
 
 A circular-economy school project by students of **Government Senior Secondary School, Fatehpur Chandila, Faridabad (Haryana)**.
 Old denim is upcycled into eco-friendly products with a natural **neem finish**: anti-microbial, mosquito-repellent and 100% chemical-free.
 
-## 👩‍🏫 Team
+##  Team
 
 | Role | Name |
 | --- | --- |
